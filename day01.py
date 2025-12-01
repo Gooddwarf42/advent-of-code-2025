@@ -69,7 +69,6 @@ def solve_part2(source: list[str]) -> int:
             case Direction.L:
                 current = (current + 100 - move.steps) % 100
 
-
     return count
 
 
