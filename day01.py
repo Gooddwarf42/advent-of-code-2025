@@ -72,10 +72,10 @@ def solve_part2(source: list[str]) -> int:
     return count
 
 
-
-file = Path(__file__).parent / "01.txt"
-parsed = parse_lines(file)
-result = solve_part1(parsed)
-print(result)
-result = solve_part2(parsed)
-print(result)
+if __name__ == "__main__":
+    file = Path(__file__).parent / "01.txt"
+    parsed = parse_lines(file)
+    result = solve_part1(parsed)
+    print(result)
+    result = solve_part2(parsed)
+    print(result)
