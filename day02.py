@@ -23,10 +23,11 @@ def get_ranges(source: str) -> list[Range]:
 
     return ranges
 
-def is_repetition(prefix : int, number : int) -> bool:
+
+def is_repetition(prefix: int, number: int) -> bool:
     length = len(str(number))
     prefix_length = len(str(prefix))
-    if length % prefix_length != 0 :
+    if length % prefix_length != 0:
         return False
 
     repetitions = length // prefix_length
@@ -44,6 +45,16 @@ def is_repetition(prefix : int, number : int) -> bool:
         i = i + 1
 
     return True
+
+
+def is_repetition_but_better(source: str, prefix_length: int):
+    length = len(source)
+    if length % prefix_length != 0:
+        return False
+
+    repetitions = length // prefix_length
+    prefix = source[:prefix_length]
+    return prefix * repetitions == source
 
 
 def solve_part1(source: str) -> int:
@@ -79,11 +90,11 @@ def solve_part2(source: str) -> int:
     for interval in ranges:
         value = interval.lower_bound
         while value <= interval.upper_bound:
-            value_length = len(str(value))
+            value_string = str(value)
+            value_length = len(value_string)
 
-            for i in range((value_length // 2) + 1):
-                prefix = value % (10 ** i)
-                if not is_repetition(prefix, value):
+            for i in range(1, (value_length // 2) + 1):
+                if not is_repetition_but_better(value_string, i):
                     continue
 
                 # print(f"{value} is repetition of {prefix}")
@@ -92,6 +103,7 @@ def solve_part2(source: str) -> int:
 
             value = value + 1
     return count
+
 
 if __name__ == "__main__":
     file = Path(__file__).parent / f"{DAY}.txt"
