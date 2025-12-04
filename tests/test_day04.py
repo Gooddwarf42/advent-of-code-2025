@@ -19,7 +19,7 @@ def test_day04_solve_part2() -> None:
     path = Path(__file__).parent / f"{DAY}.txt"
     input = parse_lines(path)
     solution = solve_part2(input)
-    assert solution == 420
+    assert solution == 43
 
 @pytest.mark.parametrize(
     ("i", "j", "expected"),

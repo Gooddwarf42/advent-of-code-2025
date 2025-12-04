@@ -57,6 +57,25 @@ def solve_part1(source: list[str]) -> int:
 
 def solve_part2(source: list[str]) -> int:
     count = 0
+    iteration_count = -1
+    while iteration_count != 0:
+        iteration_count = 0
+
+        new_source = source.copy()
+
+        for i in range(len(source)):
+            line = source[i]
+            for j in range(len(line)):
+                if source[i][j] != "@":
+                    continue
+                neighbours = count_neighbours(source, i, j)
+                if neighbours < 4:
+                    iteration_count = iteration_count + 1
+                    new_source[i] = new_source[i][:j] + "." + new_source[i][j+1:] #not really elegant
+
+        count = count+ iteration_count
+        source = new_source
+
 
     return count
 
