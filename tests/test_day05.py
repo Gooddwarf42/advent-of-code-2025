@@ -2,21 +2,21 @@ from pathlib import Path
 
 import pytest
 
-from day05 import solve_part1, solve_part2, parse_day_5, actually_solve_part_1
+from day05 import solve_part1, solve_part2, parse_day_5, count_valid, weak_normalize_ranges
 from utils.input import parse_lines, parse
 from utils.range import Range
 
 DAY = "05"
 
 
-def test_day04_solve_part1() -> None:
+def test_day05_solve_part1() -> None:
     path = Path(__file__).parent / f"{DAY}.txt"
     input = parse_lines(path)
     solution = solve_part1(input)
     assert solution == 3
 
 
-def test_day04_solve_part2() -> None:
+def test_day05_solve_part2() -> None:
     path = Path(__file__).parent / f"{DAY}.txt"
     input = parse_lines(path)
     solution = solve_part2(input)
@@ -36,13 +36,24 @@ def test_parse_day_5():
 
     assert ids == [1, 5, 8, 11, 17, 32]
 
-def test_actually_solve_part_1():
-    ranges = [
-        Range(3,3),
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ([Range(1, 3), Range(2, 2), Range(4, 8), Range(115, 120), ], [Range(1, 3), Range(4, 8), Range(115, 120), ]),
+        ([Range(1, 100), Range(2, 2), Range(4, 8)], [Range(1, 100)]),
+        ([Range(1, 3), Range(4, 5)], [Range(1, 3), Range(4, 5)]),
     ]
+)
+def test_weak_normalize_ranges(source: list[Range], expected: list[Range]):
+    assert weak_normalize_ranges(source) == expected
 
-    ids = [1,2,3,4,5]
 
-    expected = 1
-
-    assert actually_solve_part_1(ranges, ids) == expected
+def test_count_valid():
+    source = [
+        Range(1, 3),
+        Range(4, 7),
+        Range(10, 10),
+        Range(115, 120),
+    ]
+    expected = 14
+    assert count_valid(source) == 14
