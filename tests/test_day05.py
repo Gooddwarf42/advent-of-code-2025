@@ -38,14 +38,11 @@ def test_parse_day_5():
 
 def test_actually_solve_part_1():
     ranges = [
-        Range(3, 5),
-        Range(10, 14),
-        Range(16, 20),
-        Range(12, 18),
+        Range(3,3),
     ]
 
-    ids = [16]
+    ids = [1,2,3,4,5]
 
-    expected = 0
+    expected = 1
 
     assert actually_solve_part_1(ranges, ids) == expected

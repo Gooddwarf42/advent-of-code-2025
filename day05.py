@@ -19,15 +19,12 @@ def actually_solve_part_1(ranges:list[Range], ids: list[int]) -> int:
     count = 0
 
     for id in ids:
-        id_is_good = False
         for range in ranges:
             if not is_in_bound(id, range, True, True):
                 continue
 
-            id_is_good = True
-            break
-        if not id_is_good:
             count = count + 1
+            break
 
     return count
 
