@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from utils.input import parse_lines, parse
-from utils.range import Range, get_ranges_from_lines
+from utils.range import Range, get_ranges_from_lines, is_in_bound
 
 DAY = "05"
 
@@ -18,6 +18,18 @@ def parse_day_5(source: list[str]) -> tuple[list[Range], list[int]]:
 
 def solve_part1(source: list[str]) -> int:
     count = 0
+
+    ranges, ids = parse_day_5(source)
+    for id in ids:
+        id_is_good = False
+        for range in ranges:
+            if not is_in_bound(id, range, True, True):
+                continue
+
+            id_is_good = True
+            break
+        if not id_is_good:
+            count = count + 1
 
     return count
 
