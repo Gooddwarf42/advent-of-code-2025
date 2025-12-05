@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from day05 import solve_part1, solve_part2, parse_day_5
+from day05 import solve_part1, solve_part2, parse_day_5, actually_solve_part_1
 from utils.input import parse_lines, parse
 from utils.range import Range
 
@@ -28,10 +28,24 @@ def test_parse_day_5():
     input = parse_lines(path)
     ranges, ids = parse_day_5(input)
     assert ranges == [
-        Range(3,5),
-        Range(10,14),
-        Range(16,20),
-        Range(12,18),
+        Range(3, 5),
+        Range(10, 14),
+        Range(16, 20),
+        Range(12, 18),
     ]
 
-    assert ids == [1,5,8,11,17,32]
+    assert ids == [1, 5, 8, 11, 17, 32]
+
+def test_actually_solve_part_1():
+    ranges = [
+        Range(3, 5),
+        Range(10, 14),
+        Range(16, 20),
+        Range(12, 18),
+    ]
+
+    ids = [16]
+
+    expected = 0
+
+    assert actually_solve_part_1(ranges, ids) == expected

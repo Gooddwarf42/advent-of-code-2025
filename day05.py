@@ -15,11 +15,9 @@ def parse_day_5(source: list[str]) -> tuple[list[Range], list[int]]:
 
     return ranges, item_ids
 
-
-def solve_part1(source: list[str]) -> int:
+def actually_solve_part_1(ranges:list[Range], ids: list[int]) -> int:
     count = 0
 
-    ranges, ids = parse_day_5(source)
     for id in ids:
         id_is_good = False
         for range in ranges:
@@ -32,6 +30,10 @@ def solve_part1(source: list[str]) -> int:
             count = count + 1
 
     return count
+
+def solve_part1(source: list[str]) -> int:
+    ranges, ids = parse_day_5(source)
+    return actually_solve_part_1(ranges, ids)
 
 
 def solve_part2(source: list[str]) -> int:
