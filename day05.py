@@ -49,9 +49,14 @@ def weak_normalize_ranges(ranges: list[Range]) -> list[Range]:
     parenthesisms.sort(key=lambda gigi : gigi[0])
     count_opens = 0
     lb_to_append = None
+    last_appended_ub = None
     for parenthesis in parenthesisms:
         if count_opens == 0:
+            # spaghetts
             lb_to_append = parenthesis[0]
+            if len(normalized) > 0 and lb_to_append == last_appended_ub:
+                last = normalized.pop()
+                lb_to_append = last.lower_bound
 
         if parenthesis[1] == Direction.OPEN:
             count_opens = count_opens + 1
@@ -59,7 +64,8 @@ def weak_normalize_ranges(ranges: list[Range]) -> list[Range]:
             count_opens = count_opens - 1
 
         if count_opens == 0:
-            normalized.append(Range(lb_to_append, parenthesis[0]))
+            last_appended_ub = parenthesis[0]
+            normalized.append(Range(lb_to_append, last_appended_ub))
 
     return normalized
 

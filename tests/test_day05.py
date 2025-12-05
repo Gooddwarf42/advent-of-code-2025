@@ -42,6 +42,7 @@ def test_parse_day_5():
         ([Range(1, 3), Range(2, 2), Range(4, 8), Range(115, 120), ], [Range(1, 3), Range(4, 8), Range(115, 120), ]),
         ([Range(1, 100), Range(2, 2), Range(4, 8)], [Range(1, 100)]),
         ([Range(1, 3), Range(4, 5)], [Range(1, 3), Range(4, 5)]),
+        ([Range(1, 3), Range(3, 3), Range(3, 8)], [Range(1, 8)]),
     ]
 )
 def test_weak_normalize_ranges(source: list[Range], expected: list[Range]):
@@ -56,4 +57,4 @@ def test_count_valid():
         Range(115, 120),
     ]
     expected = 14
-    assert count_valid(source) == 14
+    assert count_valid(source) == expected
