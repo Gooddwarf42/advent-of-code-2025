@@ -1,27 +1,9 @@
 import time
-from dataclasses import dataclass
-from enum import Enum
 from pathlib import Path
 from utils.input import parse_lines, parse
+from utils.range import get_ranges
 
 DAY = "02"
-
-
-@dataclass()
-class Range:
-    lower_bound: int
-    upper_bound: int
-
-
-def get_ranges(source: str) -> list[Range]:
-    raw_ranges = source.split(',')
-    ranges: list[Range] = []
-    for raw_range in raw_ranges:
-        bounds = raw_range.split('-')
-        range_to_append = Range(int(bounds[0]), int(bounds[1]))
-        ranges.append(range_to_append)
-
-    return ranges
 
 
 def is_repetition(prefix: int, number: int) -> bool:
@@ -59,7 +41,7 @@ def is_repetition_but_better(source: str, prefix_length: int):
 
 def solve_part1(source: str) -> int:
     count = 0
-    ranges = get_ranges(source)
+    ranges = get_ranges(source, ",")
     # let's make it stupid for now. I hate this. But I want to see part 2
     for interval in ranges:
         value = interval.lower_bound
@@ -85,7 +67,7 @@ def solve_part1(source: str) -> int:
 
 def solve_part2(source: str) -> int:
     count = 0
-    ranges = get_ranges(source)
+    ranges = get_ranges(source, ",")
     # let's keep it stupid for now. I hate this. Maybe I'll think of something better
     for interval in ranges:
         value = interval.lower_bound
