@@ -1,3 +1,4 @@
+import re
 import time
 from dataclasses import dataclass
 from enum import Enum
@@ -18,7 +19,7 @@ def multiply(source:list[int])->int:
 
 
 def sanitize_line(line:str) -> list[str]:
-    return []
+    return re.split("\s+", line.strip())
 
 def sanitize_input(source: list[str]) -> tuple[list[list[int]], list[str]]:
 

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from day06 import solve_part1, solve_part2
+from day06 import solve_part1, solve_part2, multiply, sanitize_line, sanitize_input
 from utils.input import parse_lines, parse
 from utils.range import Range
 
@@ -20,16 +20,35 @@ def test_day06_solve_part2() -> None:
     path = Path(__file__).parent / f"{DAY}.txt"
     input = parse_lines(path)
     solution = solve_part2(input)
-    assert solution == 14
+    assert solution == 3263827
 
 
-def test_multiply():
-    assert False
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ([], 1),
+        ([2, 4], 8),
+        ([5, -4, 3], -60),
+    ]
+)
+def test_multiply(source:list[int], expected:int):
+    assert multiply(source) == expected
 
 
-def test_sanitize_line():
-    assert False
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("a   b  c", ["a", "b", "c"]),
+        ("            v", ["v"]),
+        (" v ", ["v"]),
+    ]
+)
+def test_sanitize_line(source:str, expected:list[str]):
+    assert sanitize_line(source) == expected
 
 
 def test_sanitize_input():
-    assert False
+    path = Path(__file__).parent / f"{DAY}.txt"
+    input = parse_lines(path)
+    sanitized = sanitize_input(input)
+    assert sanitized == ([[123,45,6], [328,64,98], [51,387,215], [64,23,314]], ["*", "+", "*", "+"])
