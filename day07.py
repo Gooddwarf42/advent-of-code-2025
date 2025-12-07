@@ -13,6 +13,8 @@ DAY = "07"
 def solve_part1(source: list[str]) -> int:
     count = 0
     beams: list[int] = [source[0].index("S")]
+
+    bounds = Range(0, len(source[0]))
     
     for line in source[1:]:
         next_beams = []
@@ -20,13 +22,12 @@ def solve_part1(source: list[str]) -> int:
             if line[beam_index] != "^":
                 next_beams.append(beam_index)
                 continue
+
+            for neighbour in (beam_index + 1, beam_index - 1):
+                if not is_in_bound(neighbour, bounds):
+                    continue
+                next_beams.append(neighbour)
             
-            if beam_index > 0:
-                next_beams.append(beam_index - 1)
-
-            if beam_index < len(line) - 1:
-                next_beams.append(beam_index + 1)
-
             count = count + 1
         
         beams = distinct(next_beams)
@@ -37,21 +38,21 @@ def solve_part1(source: list[str]) -> int:
 def solve_part2(source: list[str]) -> int:
     starting_beam_index = source[0].index("S")
     beams: dict[int, int] = {starting_beam_index: 1} 
-
+    bounds = Range(0, len(source[0]))
     for line in source[1:]:
         current_beams = beams.copy() #makes a shallow copy, so we don't do weird shit when iterating
         for beam_index, timelines in current_beams.items():
             if line[beam_index] != "^":
                 continue
 
-            if beam_index > 0:
-                current_right_value = beams.get(beam_index + 1)
-                beams[beam_index + 1] = timelines + (current_right_value if current_right_value is not None else 0)
-
-            if beam_index < len(line) - 1:
-                current_left_value = beams.get(beam_index - 1)
-                beams[beam_index - 1] = timelines + (current_left_value if current_left_value is not None else 0)
-
+            for neighbour in (beam_index + 1, beam_index - 1):
+                if not is_in_bound(neighbour, bounds):
+                    continue
+                # we are modifying the (timelines) values of the dictionary we are iterating on!
+                # this is sketchy, but if you think hard about it for a moment, you can
+                # convince yourself that it is safe.
+                beams[neighbour] = timelines + beams.get(neighbour, 0)
+                
             beams.pop(beam_index)
             
     return sum(beams.values())
