@@ -21,3 +21,7 @@ def split_list(source: list[T], separator: T) -> list[list[T]]:
         result.append(current_group)
 
     return result
+
+
+def distinct(source: list[T]) -> list[T]:
+    return list(dict.fromkeys(source))
