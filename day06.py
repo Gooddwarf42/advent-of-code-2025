@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Tuple
 
 from utils.input import parse_lines, parse
+from utils.list import split_list
 from utils.range import Range, get_ranges_from_lines, is_in_bound
 
 DAY = "06"
@@ -39,6 +40,33 @@ def sanitize_input(source: list[str]) -> tuple[list[list[int]], list[str]]:
     return numbers, operators
 
 
+
+def sanitize_input_part_2(source: list[str]) -> tuple[list[list[int]], list[str]]:
+
+    input_length = len(source)
+
+    #read operators
+    operators : list[str] = sanitize_line(source[-1])
+
+    #initialize numbers, which will hold in order the operands to use
+    numbers: list[list[int]] = [[] for _ in range(len(operators))]
+
+    #translate everything into an array of strings read top-bottom
+    top_to_bottom_reads: list[str] = []
+    for i in range(len(source[0])):
+        gigi = [line[i] for line in source[:input_length - 1]]
+        string_number = "".join(gigi).strip()
+        top_to_bottom_reads.append(string_number)
+
+    reads_grouped: list[list[str]] = split_list(top_to_bottom_reads, "")
+
+    for i, group in enumerate(reads_grouped):
+        rawr = [int(string_number) for string_number in group]
+        numbers[i] = rawr
+
+    return numbers, operators
+
+
 def solve_part1(source: list[str]) -> int:
     count = 0
 
@@ -58,12 +86,24 @@ def solve_part1(source: list[str]) -> int:
 
 def solve_part2(source: list[str]) -> int:
     count = 0
+
+    numbers, operators = sanitize_input_part_2(source)
+
+    for i, operator in enumerate(operators):
+        if operator == "+":
+            count = count + sum(numbers[i])
+            continue
+        if operator == "*":
+            count = count + multiply(numbers[i])
+            continue
+        raise Exception("invalid operator")
+
     return count
 
 
 if __name__ == "__main__":
     file = Path(__file__).parent / f"{DAY}.txt"
-    parsed = parse_lines(file)
+    parsed = parse_lines(file, False)
     start = time.perf_counter()
     result = solve_part1(parsed)
     end = time.perf_counter()
