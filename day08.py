@@ -40,21 +40,16 @@ def populate_distances(points: list[Point3d]) -> list[list[float]]:
 
 
 # Ugly to write tests for, ugh....
-def find_shortest_distance(mf_set: DisjointSet, points: list[Point3d], distances:list[list[float]]) -> tuple[Point3d, Point3d]:
+def find_shortest_distance(points: list[Point3d], distances:list[list[float]]) -> tuple[Point3d, Point3d]:
     minimum_distance = MAXINT
 
     the_i: int | None = None
     the_j: int | None = None
 
-    for i, item in enumerate(points):
+    for i in range(len(points)):
         for j in range(i + 1, len(points)):
-            second_item = points[j]
-            
             distance = distances[i][j]
             if distance > minimum_distance:
-                continue
-
-            if mf_set.connected(item, second_item):
                 continue
 
             the_i = i
@@ -64,6 +59,7 @@ def find_shortest_distance(mf_set: DisjointSet, points: list[Point3d], distances
     if the_i is None or the_j is None:
         raise Exception("brutte cose")
 
+    distances[the_i][the_j] = MAXINT # ugly! but it'll work
     return points[the_i], points[the_j]
 
 
@@ -72,11 +68,11 @@ def solve_part1(source: list[str]) -> int:
     distances = populate_distances(points)
     mf_set = DisjointSet(points)
 
-    times = 999  # yeah it will bereak tests, too lazy to parametrize this
+    times = 1000  # yeah it will bereak tests, too lazy to parametrize this
     for iter in range(times):
         x: Point3d
         y: Point3d
-        x, y = find_shortest_distance(mf_set, points, distances)
+        x, y = find_shortest_distance(points, distances)
         mf_set.merge(x, y)
 
     sizes = [len(s) for s in mf_set.subsets()]
