@@ -81,7 +81,19 @@ def solve_part1(source: list[str]) -> int:
 
 
 def solve_part2(source: list[str]) -> int:
-    return 0
+    points = get_points(source)
+    distances = populate_distances(points)
+    mf_set = DisjointSet(points)
+    
+    while True:
+        first_point: Point3d
+        second_point: Point3d
+        first_point, second_point = find_shortest_distance(points, distances)
+        mf_set.merge(first_point, second_point)
+        if len(mf_set.subsets()) == 1:
+            break
+
+    return first_point.x * second_point.x
 
 
 if __name__ == "__main__":
