@@ -4,7 +4,7 @@ import math
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(frozen=True)
 class Point3d:
     x: int
     y: int
