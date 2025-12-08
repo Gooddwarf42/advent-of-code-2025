@@ -1,8 +1,9 @@
+import math
 from pathlib import Path
 
 import pytest
 
-from day08 import solve_part1, solve_part2, get_points
+from day08 import solve_part1, solve_part2, get_points, populate_distances
 from utils.input import parse_lines, parse
 from utils.points import Point3d
 from utils.range import Range
@@ -30,7 +31,21 @@ def test_get_points():
         "4,5,6"
     ]
     expected = [
-        Point3d(1,2,3),
-        Point3d(4,5,6)
+        Point3d(1, 2, 3),
+        Point3d(4, 5, 6)
     ]
     assert get_points(source) == expected
+
+
+def test_populate_distances():
+    source = [
+        Point3d(0, 0, 0),
+        Point3d(1, 1, 1),
+        Point3d(1, 1, 2),
+    ]
+    expected = [
+        [0,math.sqrt(3),math.sqrt(6)],
+        [0,0,1],
+        [0,0,0],
+    ]
+    assert populate_distances(source) == expected
