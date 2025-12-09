@@ -22,7 +22,7 @@ def test_day09_solve_part2() -> None:
     path = Path(__file__).parent / f"{DAY}.txt"
     input = parse_lines(path)
     solution = solve_part2(input)
-    assert solution == 25272
+    assert solution == 24
 
 def test_get_area_info():
     source = [
