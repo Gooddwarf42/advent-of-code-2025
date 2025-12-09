@@ -37,6 +37,14 @@ def solve_part1(source: list[str]) -> int:
 
 
 def solve_part2(source: list[str]) -> int:
+    points = get_points2d(source)
+
+    max_x = max([point.x for point in points])
+    max_y = max([point.y for point in points])
+    print_thing = [["." for _ in range(max_y)] for _ in range(max_x)]
+
+
+
     return 0
 
 
