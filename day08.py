@@ -13,7 +13,7 @@ from scipy.linalg import sqrtm
 
 from utils.input import parse_lines, parse
 from utils.list import distinct
-from utils.points import Point3d
+from utils.points import Point3d, get_points3d
 from utils.range import Range, get_ranges_from_lines, is_in_bound
 
 DAY = "08"
@@ -23,14 +23,6 @@ class DistanceInfo:
     distance: float
     first_index: int
     second_index: int
-    
-
-def get_points(source: list[str]) -> list[Point3d]:
-    points: list[Point3d] = []
-    for line in source:
-        coordsinates = [int(s) for s in line.split(",")]
-        points.append(Point3d(coordsinates[0], coordsinates[1], coordsinates[2]))
-    return points
 
 def get_distance_info(points: list[Point3d]) -> list[DistanceInfo]:
     n = len(points)
@@ -46,7 +38,7 @@ def get_distance_info(points: list[Point3d]) -> list[DistanceInfo]:
     return res
 
 def solve_part1(source: list[str]) -> int:
-    points = get_points(source)
+    points = get_points3d(source)
     distances = get_distance_info(points)
     mf_set = DisjointSet(points)
 
@@ -63,7 +55,7 @@ def solve_part1(source: list[str]) -> int:
 
 
 def solve_part2(source: list[str]) -> int:
-    points = get_points(source)
+    points = get_points3d(source)
     distances = get_distance_info(points)
     mf_set = DisjointSet(points)
     
