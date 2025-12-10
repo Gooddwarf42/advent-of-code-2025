@@ -43,8 +43,8 @@ def solve_part2(source: list[str]) -> int:
     max_x = max([point.x for point in points])
     max_y = max([point.y for point in points])
 
-    min_x = max([point.x for point in points])
-    min_y = max([point.y for point in points])
+    min_x = min([point.x for point in points])
+    min_y = min([point.y for point in points])
 
     on_top = count(points, lambda p: p.y == min_y)
     on_left = count(points, lambda p: p.x == min_x)
@@ -80,6 +80,30 @@ def solve_part2(source: list[str]) -> int:
     # Todo: find bounding rectangles (a set of bounding rectangles per corner, easily identified by their opposite vertexes)
     # iterate on all rectangles (in decreasing order of area) and check collision with any of the bounding rectangles using AABB
     # TODO uffa non penso andrà. Piango
+
+    # proviamo stupido
+    area_info = get_area_info(points)
+    area_info.reverse()
+    print(area_info[1].area)
+
+    for info in area_info:
+        first_point = points[info.first_index]
+        second_point = points[info.second_index]
+        caccola = [first_point, second_point]
+        max_x = max([point.x for point in caccola])
+        max_y = max([point.y for point in caccola])
+
+        min_x = min([point.x for point in caccola])
+        min_y = min([point.y for point in caccola])
+
+        predicate = lambda p : min_x < p.x < max_x and min_y < p.y < max_y
+        if any(predicate(p) for p in points):
+            continue
+
+        print("this one does not have strictly internal vertexes!")
+        print(first_point)
+        print(second_point)
+        return info.area
 
 
     return 0
