@@ -55,8 +55,31 @@ def solve_part2(source: list[str]) -> int:
     print([on_top, on_left, on_right, on_bottom])
     # this gives us [2,2,2,2]. We can rid of some annoying edge cases then!
 
+    # just for the sake of more edge case avoidance, I wanna see if we alternate left and right turns
+    turns: list[int] = []
+    for i in range(len(points)):
+        this_point = points[i]
+        next_point = points[(i+1) % len(points)]
+        prev_point = points[(len(points)+ i - 1) % len(points)]
+        vec_prev = [prev_point.x - this_point.x, prev_point.y - this_point.y]
+        vec_next = [next_point.x - this_point.x, next_point.y - this_point.y]
+        turn = vec_prev[0] * vec_next[1] - vec_prev[1] * vec_next[0]
+        turns.append(abs(turn)//turn)
+
+
+    evil = []
+    for i in range(len(turns) - 1):
+        if turns[i] != turns[(i+1) % len(turns)]:
+            continue
+        turn_type = "L" if turns[i] == 1 else "R"
+        print(f"Same turn ({turn_type}) detected at index {i}: point {points[i]}")
+        evil.append([i, turn_type])
+
+    print(len(evil))
+    print(evil)
     # Todo: find bounding rectangles (a set of bounding rectangles per corner, easily identified by their opposite vertexes)
     # iterate on all rectangles (in decreasing order of area) and check collision with any of the bounding rectangles using AABB
+    # TODO uffa non penso andrà. Piango
 
 
     return 0
