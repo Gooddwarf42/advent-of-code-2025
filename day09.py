@@ -1,13 +1,11 @@
 import time
 from dataclasses import dataclass
-from enum import Enum
 from pathlib import Path
-from typing import Tuple
 
-from utils.input import parse_lines, parse
+from utils.input import parse_lines
 from utils.list import count
 from utils.points import Point2d, get_points2d
-from utils.range import Range, get_ranges_from_lines, is_in_bound
+import tkinter as tk
 
 DAY = "09"
 
@@ -68,7 +66,7 @@ def solve_part2(source: list[str]) -> int:
 
 
     evil = []
-    for i in range(len(turns) - 1):
+    for i in range(len(turns)):
         if turns[i] != turns[(i+1) % len(turns)]:
             continue
         turn_type = "L" if turns[i] == 1 else "R"
@@ -77,9 +75,49 @@ def solve_part2(source: list[str]) -> int:
 
     print(len(evil))
     print(evil)
+    
+    # what about three times same turn?
+    evil = []
+    for i in range(len(turns)):
+        if not(turns[i] == turns[(i+1) % len(turns)] == turns[(i+2) % len(turns)]):
+            continue
+        turn_type = "L" if turns[i] == 1 else "R"
+        print(f"DOUBLE Same turn ({turn_type}) detected at index {i}: point {points[i]}")
+        evil.append([i, turn_type])
+
+    print(len(evil))
+    print(evil)
     # Todo: find bounding rectangles (a set of bounding rectangles per corner, easily identified by their opposite vertexes)
     # iterate on all rectangles (in decreasing order of area) and check collision with any of the bounding rectangles using AABB
     # TODO uffa non penso andrà. Piango
+
+
+    # drawiamo qualche cagatina
+    def draw_lines(canvas, pts: list[tuple[float, float]], color="black", width=2):
+        # Draw lines connecting consecutive points
+        for point_one, point_two in zip(pts, pts[1:]):
+            canvas.create_line(point_one[0], point_one[1], point_two[0], point_two[1], fill=color, width=width)
+            
+        canvas.create_line(pts[0][0], pts[0][1], pts[-1][0], pts[-1][1], fill=color, width=width)
+
+        # Optional: draw the points as small circles
+        r = 3
+        for pt in pts:
+            canvas.create_oval(pt[0] - r, pt[1] - r, pt[0] + r, pt[1] + r, fill=color)
+
+    root = tk.Tk()
+    root.title("Line Drawing Example")
+
+    canvas = tk.Canvas(root, width=1200, height=1200, bg="white")
+    canvas.pack()
+
+    scale = 0.0115
+    scaled_points = [(p.x * scale, p.y * scale) for p in points]
+    draw_lines(canvas, scaled_points, color="blue", width=2)
+
+    root.mainloop()
+
+
 
     # proviamo stupido
     area_info = get_area_info(points)
