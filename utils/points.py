@@ -30,7 +30,10 @@ class Point2d:
         )
 
     def rectangle_area(self: Point2d, other:Point2d) -> int:
-        return abs(((self.x - other.x) + 1) * ((self.y - other.y) + 1))
+        return abs((self.x - other.x ) * (self.y - other.y))
+
+    def rectangle_area_discrete(self: Point2d, other:Point2d) -> int:
+        return (abs(self.x - other.x) + 1) * (abs(self.y - other.y) + 1)
 
 
 def get_points3d(source: list[str]) -> list[Point3d]:

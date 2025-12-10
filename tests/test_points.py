@@ -91,6 +91,29 @@ def test_point2d_rectangle_area_symmetry(a: Point2d, b: Point2d):
     assert (a.rectangle_area(b) == b.rectangle_area(a))
 
 
+@pytest.mark.parametrize(
+    ("a", "b", "expected"),
+    [
+        (Point2d(0,0), Point2d(0,0), 1),
+        (Point2d(0,0), Point2d(0,3), 4),
+        (Point2d(0,0), Point2d(3,3), 16),
+        (Point2d(0,0), Point2d(3,-3), 16),
+    ]
+)
+def test_point2d_rectangle_area_discrete(a: Point2d, b: Point2d, expected: int):
+    assert (a.rectangle_area_discrete(b) == expected)
+
+
+@given(point2d, point2d)
+def test_point2d_rectangle_area_discrete_positivity(a: Point2d, b: Point2d):
+    assert (a.rectangle_area_discrete(b) >= 0)
+
+
+@given(point2d, point2d)
+def test_point2d_rectangle_area_discrete_symmetry(a: Point2d, b: Point2d):
+    assert (a.rectangle_area_discrete(b) == b.rectangle_area_discrete(a))
+
+
 def test_get_points3d():
     source = [
         "1,2,3",

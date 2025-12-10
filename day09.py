@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Tuple
 
 from utils.input import parse_lines, parse
+from utils.list import count
 from utils.points import Point2d, get_points2d
 from utils.range import Range, get_ranges_from_lines, is_in_bound
 
@@ -24,7 +25,7 @@ def get_area_info(points: list[Point2d]) -> list[AreaInfo]:
         item = points[i]
         for j in range(i + 1, n):
             second_item = points[j]
-            area = item.rectangle_area(second_item)
+            area = item.rectangle_area_discrete(second_item)
             res.append(AreaInfo(area, i, j))
 
     res.sort(key=lambda info: info.area)
@@ -41,8 +42,18 @@ def solve_part2(source: list[str]) -> int:
 
     max_x = max([point.x for point in points])
     max_y = max([point.y for point in points])
-    print_thing = [["." for _ in range(max_y)] for _ in range(max_x)]
 
+    min_x = max([point.x for point in points])
+    min_y = max([point.y for point in points])
+
+    on_top = count(points, lambda p: p.y == min_y)
+    on_left = count(points, lambda p: p.x == min_x)
+    on_bottom = count(points, lambda p: p.y == max_y)
+    on_right = count(points, lambda p: p.x == max_x)
+
+
+    print([on_top, on_left, on_right, on_bottom])
+    # this gives us [2,2,2,2]. We can rid of some annoying edge cases then.
 
 
     return 0
