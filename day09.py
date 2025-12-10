@@ -53,7 +53,10 @@ def solve_part2(source: list[str]) -> int:
 
 
     print([on_top, on_left, on_right, on_bottom])
-    # this gives us [2,2,2,2]. We can rid of some annoying edge cases then.
+    # this gives us [2,2,2,2]. We can rid of some annoying edge cases then!
+
+    # Todo: find bounding rectangles (a set of bounding rectangles per corner, easily identified by their opposite vertexes)
+    # iterate on all rectangles (in decreasing order of area) and check collision with any of the bounding rectangles using AABB
 
 
     return 0
