@@ -2,25 +2,29 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+from scipy.stats import false_discovery_control
+
 from utils.input import parse_lines
 from utils.list import count
 from utils.points import Point2d, get_points2d
 import tkinter as tk
 
-from utils.range import Range
+from utils.range import Range, is_in_bound
 
 DAY = "09"
 
-@dataclass(frozen = True)
+
+@dataclass(frozen=True)
 class AreaInfo:
     area: int
     first_index: int
     second_index: int
 
-@dataclass(frozen = True)
+
+@dataclass(frozen=True)
 class WallInfo:
     index: int
-    ran : Range
+    ran: Range
 
 
 def get_area_info(points: list[Point2d]) -> list[AreaInfo]:
@@ -36,8 +40,9 @@ def get_area_info(points: list[Point2d]) -> list[AreaInfo]:
     res.sort(key=lambda info: info.area)
     return res
 
+
 def find_vertical_walls(points: list[Point2d]) -> list[WallInfo]:
-    walls : list[WallInfo] = []
+    walls: list[WallInfo] = []
 
     for i in range(len(points)):
         this_point = points[i]
@@ -51,8 +56,46 @@ def find_vertical_walls(points: list[Point2d]) -> list[WallInfo]:
     return walls
 
 
+def is_wall_on_left(wall: WallInfo, point: Point2d) -> bool:
+    if wall.index >= point.x:
+        return False
+    return is_in_bound(point.y, wall.ran, False, True)
+
+
+def is_wall_on_right(wall: WallInfo, point: Point2d) -> bool:
+    if wall.index <= point.x:
+        return False
+    return is_in_bound(point.y, wall.ran, False, True)
+
+def has_wall_on_left(wall: WallInfo, walls: list[WallInfo]) -> bool:
+    def is_wall_on_left_of_a_wall(source:WallInfo, target: WallInfo) -> bool:
+        if target.index >= source.index:
+            return False
+        if target.ran.lower_bound > source.ran.upper_bound:
+            return False
+        if target.ran.upper_bound < source.ran.lower_bound:
+            return  False
+        return True
+
+    walls_on_left= count(walls, lambda w: is_wall_on_left_of_a_wall(wall, w))
+    return walls_on_left > 0
+
+def has_wall_on_right(wall: WallInfo, walls: list[WallInfo]) -> bool:
+    def is_wall_on_right_of_a_wall(source:WallInfo, target: WallInfo) -> bool:
+        if target.index <= source.index:
+            return False
+        if target.ran.lower_bound > source.ran.upper_bound:
+            return False
+        if target.ran.upper_bound < source.ran.lower_bound:
+            return  False
+        return True
+
+    walls_on_right= count(walls, lambda w: is_wall_on_right_of_a_wall(wall, w))
+    return walls_on_right > 0
+
+
 def solve_part1(source: list[str]) -> int:
-    points =  get_points2d(source)
+    points = get_points2d(source)
     area_info = get_area_info(points)
 
     return area_info[-1].area
@@ -72,7 +115,6 @@ def solve_part2(source: list[str]) -> int:
     on_bottom = count(points, lambda p: p.y == max_y)
     on_right = count(points, lambda p: p.x == max_x)
 
-
     print([on_top, on_left, on_right, on_bottom])
     # this gives us [2,2,2,2]. We can rid of some annoying edge cases then!
 
@@ -80,17 +122,16 @@ def solve_part2(source: list[str]) -> int:
     turns: list[int] = []
     for i in range(len(points)):
         this_point = points[i]
-        next_point = points[(i+1) % len(points)]
-        prev_point = points[(len(points)+ i - 1) % len(points)]
+        next_point = points[(i + 1) % len(points)]
+        prev_point = points[(len(points) + i - 1) % len(points)]
         vec_prev = [prev_point.x - this_point.x, prev_point.y - this_point.y]
         vec_next = [next_point.x - this_point.x, next_point.y - this_point.y]
         turn = vec_prev[0] * vec_next[1] - vec_prev[1] * vec_next[0]
-        turns.append(abs(turn)//turn)
-
+        turns.append(abs(turn) // turn)
 
     evil = []
     for i in range(len(turns)):
-        if turns[i] != turns[(i+1) % len(turns)]:
+        if turns[i] != turns[(i + 1) % len(turns)]:
             continue
         turn_type = "L" if turns[i] == 1 else "R"
         print(f"Same turn ({turn_type}) detected at index {i}: point {points[i]}")
@@ -98,11 +139,11 @@ def solve_part2(source: list[str]) -> int:
 
     print(len(evil))
     print(evil)
-    
+
     # what about three times same turn?
     evil = []
     for i in range(len(turns)):
-        if not(turns[i] == turns[(i+1) % len(turns)] == turns[(i+2) % len(turns)]):
+        if not (turns[i] == turns[(i + 1) % len(turns)] == turns[(i + 2) % len(turns)]):
             continue
         turn_type = "L" if turns[i] == 1 else "R"
         print(f"DOUBLE Same turn ({turn_type}) detected at index {i}: point {points[i]}")
@@ -115,6 +156,15 @@ def solve_part2(source: list[str]) -> int:
     # TODO uffa non penso andrà. Piango
 
     vertical_walls = find_vertical_walls(points)
+    good_left_walls: list[WallInfo] = []
+    good_right_walls: list[WallInfo] = []
+    for wall in vertical_walls:
+        if not has_wall_on_left(wall, vertical_walls):
+            good_left_walls.append(wall)
+            continue
+        if not has_wall_on_right(wall, vertical_walls):
+            good_right_walls.append(wall)
+            continue
 
 
     # drawiamo qualche cagatina
@@ -122,13 +172,18 @@ def solve_part2(source: list[str]) -> int:
         # Draw lines connecting consecutive points
         for point_one, point_two in zip(pts, pts[1:]):
             canvas.create_line(point_one[0], point_one[1], point_two[0], point_two[1], fill=color, width=width)
-            
+
         canvas.create_line(pts[0][0], pts[0][1], pts[-1][0], pts[-1][1], fill=color, width=width)
 
         # Optional: draw the points as small circles
         r = 3
         for pt in pts:
             canvas.create_oval(pt[0] - r, pt[1] - r, pt[0] + r, pt[1] + r, fill=color)
+
+    def draw_rectangle(canvas: tk.Canvas, pts: list[tuple[float, float]], first: int, second: int, color="black", width=2):
+        marmellata = pts[first]
+        giusteppe = pts[second]
+        canvas.create_rectangle(marmellata[0], marmellata[1], giusteppe[0], giusteppe[1], fill=color, width=width)
 
     root = tk.Tk()
     root.title("Line Drawing Example")
@@ -137,12 +192,21 @@ def solve_part2(source: list[str]) -> int:
     canvas.pack()
 
     scale = 0.0115
+    scale = 30
     scaled_points = [(p.x * scale, p.y * scale) for p in points]
     draw_lines(canvas, scaled_points, color="blue", width=2)
 
-    scaled_vert_walls = [ [(wall.index*scale, wall.ran.lower_bound*scale), (wall.index*scale, wall.ran.upper_bound*scale)] for wall in vertical_walls]
+    scaled_vert_walls = [[(wall.index * scale, wall.ran.lower_bound * scale), (wall.index * scale, wall.ran.upper_bound * scale)] for wall in vertical_walls]
     for scaled_wall in scaled_vert_walls:
         draw_lines(canvas, scaled_wall, color="red", width=1)
+
+    scaled_good_left_vert_walls = [[(wall.index * scale, wall.ran.lower_bound * scale), (wall.index * scale, wall.ran.upper_bound * scale)] for wall in good_left_walls]
+    for scaled_wall in scaled_good_left_vert_walls:
+        draw_lines(canvas, scaled_wall, color="green", width=4)
+
+    scaled_good_right_vert_walls = [[(wall.index * scale, wall.ran.lower_bound * scale), (wall.index * scale, wall.ran.upper_bound * scale)] for wall in good_right_walls]
+    for scaled_wall in scaled_good_right_vert_walls:
+        draw_lines(canvas, scaled_wall, color="purple", width=4)
 
     root.mainloop()
 
@@ -150,9 +214,12 @@ def solve_part2(source: list[str]) -> int:
     area_info = get_area_info(points)
     area_info.reverse()
 
-    el_cachone : dict[Point2d, bool] = {}
+    el_cachone: dict[Point2d, bool] = {}
 
     for info in area_info:
+        if info.first_index != 4 or info.second_index != 6:
+            continue
+
         first_point = points[info.first_index]
         second_point = points[info.second_index]
         caccola = [first_point, second_point]
@@ -162,10 +229,54 @@ def solve_part2(source: list[str]) -> int:
         min_x = min([point.x for point in caccola])
         min_y = min([point.y for point in caccola])
 
-        for i in range(min_x, max_x + 1):
-            for j in range(min_y, max_y + 1):
-                current_test_point =
-        return info.area
+        # LALALALALLA IO NON HO VISTO NIENTE!
+        rect_points = [Point2d(x, y)
+                       for x in range(min_x, max_x + 1)
+                       for y in range(min_y, max_y + 1)]
+
+        is_good = True
+        for current_test_point in rect_points:
+            is_this_point_inside = False
+            if current_test_point in el_cachone:
+                is_this_point_inside = el_cachone[current_test_point]
+                if not is_this_point_inside:
+                    print(f"rejecting rectangle {info} because point {current_test_point} is detected to not be inside")
+                    is_good = False
+                    break
+                continue
+
+            # things
+            walls_on_left = count(vertical_walls, lambda wall: is_wall_on_left(wall, current_test_point))
+            walls_on_on_right = count(vertical_walls, lambda wall: is_wall_on_right(wall, current_test_point))
+
+            if count(vertical_walls, lambda wall : current_test_point.x == wall.index and is_in_bound(current_test_point.y, wall.ran, True, True)) > 0:
+                #the point lies exactly on a vertical wall, consider it internal
+                is_this_point_inside = True
+                el_cachone[current_test_point] = is_this_point_inside
+                continue
+
+            if walls_on_left % 2 == 0 or walls_on_on_right % 2  == 0:
+                # bad!
+                is_this_point_inside = False
+                el_cachone[current_test_point] = is_this_point_inside
+
+                if not is_this_point_inside:
+                    print(f"rejecting rectangle {info} because point {current_test_point} is detected to not be inside")
+                    is_good = False
+                    break
+
+        if is_good:
+            root = tk.Tk()
+            root.title("Line Drawing Example")
+
+            canvas = tk.Canvas(root, width=1200, height=1200, bg="white")
+            canvas.pack()
+            scaled_points = [(p.x * scale, p.y * scale) for p in points]
+            draw_lines(canvas, scaled_points, color="blue", width=2)
+            gigi = [scaled_points[info.first_index], scaled_points[info.second_index]]
+            draw_lines(canvas, gigi, color="green", width=3)
+            root.mainloop()
+            return info.area
 
     return 0
 
