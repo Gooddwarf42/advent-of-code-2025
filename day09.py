@@ -7,6 +7,8 @@ from utils.list import count
 from utils.points import Point2d, get_points2d
 import tkinter as tk
 
+from utils.range import Range
+
 DAY = "09"
 
 @dataclass(frozen = True)
@@ -14,6 +16,11 @@ class AreaInfo:
     area: int
     first_index: int
     second_index: int
+
+@dataclass(frozen = True)
+class WallInfo:
+    index: int
+    ran : Range
 
 
 def get_area_info(points: list[Point2d]) -> list[AreaInfo]:
@@ -28,6 +35,22 @@ def get_area_info(points: list[Point2d]) -> list[AreaInfo]:
 
     res.sort(key=lambda info: info.area)
     return res
+
+def find_vertical_walls(points: list[Point2d]) -> list[WallInfo]:
+    walls : list[WallInfo] = []
+
+    for i in range(len(points)):
+        this_point = points[i]
+        next_point = points[(i + 1) % len(points)]
+        if this_point.y == next_point.y:
+            # horizontal wall
+            continue
+        walls.append(WallInfo(this_point.x, Range(min(this_point.y, next_point.y), max(this_point.y, next_point.y))))
+
+    walls.sort(key=lambda info: info.index)
+    return walls
+
+
 def solve_part1(source: list[str]) -> int:
     points =  get_points2d(source)
     area_info = get_area_info(points)
@@ -91,6 +114,8 @@ def solve_part2(source: list[str]) -> int:
     # iterate on all rectangles (in decreasing order of area) and check collision with any of the bounding rectangles using AABB
     # TODO uffa non penso andrà. Piango
 
+    vertical_walls = find_vertical_walls(points)
+
 
     # drawiamo qualche cagatina
     def draw_lines(canvas, pts: list[tuple[float, float]], color="black", width=2):
@@ -115,14 +140,17 @@ def solve_part2(source: list[str]) -> int:
     scaled_points = [(p.x * scale, p.y * scale) for p in points]
     draw_lines(canvas, scaled_points, color="blue", width=2)
 
+    scaled_vert_walls = [ [(wall.index*scale, wall.ran.lower_bound*scale), (wall.index*scale, wall.ran.upper_bound*scale)] for wall in vertical_walls]
+    for scaled_wall in scaled_vert_walls:
+        draw_lines(canvas, scaled_wall, color="red", width=1)
+
     root.mainloop()
 
-
-
-    # proviamo stupido
+    # proviamo
     area_info = get_area_info(points)
     area_info.reverse()
-    print(area_info[1].area)
+
+    el_cachone : dict[Point2d, bool] = {}
 
     for info in area_info:
         first_point = points[info.first_index]
@@ -134,15 +162,10 @@ def solve_part2(source: list[str]) -> int:
         min_x = min([point.x for point in caccola])
         min_y = min([point.y for point in caccola])
 
-        predicate = lambda p : min_x < p.x < max_x and min_y < p.y < max_y
-        if any(predicate(p) for p in points):
-            continue
-
-        print("this one does not have strictly internal vertexes!")
-        print(first_point)
-        print(second_point)
+        for i in range(min_x, max_x + 1):
+            for j in range(min_y, max_y + 1):
+                current_test_point =
         return info.area
-
 
     return 0
 
