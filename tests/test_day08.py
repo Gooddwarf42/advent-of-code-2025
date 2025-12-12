@@ -24,19 +24,6 @@ def test_day08_solve_part2() -> None:
     solution = solve_part2(input)
     assert solution == 25272
 
-
-def test_get_points():
-    source = [
-        "1,2,3",
-        "4,5,6"
-    ]
-    expected = [
-        Point3d(1, 2, 3),
-        Point3d(4, 5, 6)
-    ]
-    assert get_points(source) == expected
-
-
 def test_get_distance_info():
     source = [
         Point3d(0, 0, 0),

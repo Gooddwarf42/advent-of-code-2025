@@ -1,4 +1,4 @@
-from typing import TypeVar
+from typing import TypeVar, Callable
 
 T = TypeVar("T")
 def split_list(source: list[T], separator: T) -> list[list[T]]:
@@ -25,3 +25,6 @@ def split_list(source: list[T], separator: T) -> list[list[T]]:
 
 def distinct(source: list[T]) -> list[T]:
     return list(dict.fromkeys(source))
+
+def count(source:list[T], predicate:Callable[[T], bool]) -> int:
+    return sum(1 for x in source if predicate(x))
