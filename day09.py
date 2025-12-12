@@ -26,6 +26,7 @@ class AreaInfo:
 class WallInfo:
     index: int
     ran: Range
+    vertical: bool
     
 ######### DRAWING STUFF #############
 
@@ -84,7 +85,7 @@ def find_vertical_walls(points: list[Point2d]) -> list[WallInfo]:
         if this_point.y == next_point.y:
             # horizontal wall
             continue
-        walls.append(WallInfo(this_point.x, Range(min(this_point.y, next_point.y), max(this_point.y, next_point.y))))
+        walls.append(WallInfo(this_point.x, Range(min(this_point.y, next_point.y), max(this_point.y, next_point.y)), True))
 
     walls.sort(key=lambda info: info.index)
     return walls
@@ -98,7 +99,7 @@ def find_horizontal_walls(points: list[Point2d]) -> list[WallInfo]:
         if this_point.x == next_point.x:
             # horizontal wall
             continue
-        walls.append(WallInfo(this_point.y, Range(min(this_point.x, next_point.x), max(this_point.x, next_point.x))))
+        walls.append(WallInfo(this_point.y, Range(min(this_point.x, next_point.x), max(this_point.x, next_point.x)), False))
 
     walls.sort(key=lambda info: info.index)
     return walls
@@ -140,6 +141,31 @@ def has_wall_on_right(wall: WallInfo, walls: list[WallInfo]) -> bool:
 
     walls_on_right= count(walls, lambda w: is_wall_on_right_of_a_wall(wall, w))
     return walls_on_right > 0
+
+def rectangle_collides_with_wall(first_point: Point2d, second_point: Point2d, wall : WallInfo) -> bool:
+    caccola = [first_point, second_point]
+    max_x = max([point.x for point in caccola])
+    max_y = max([point.y for point in caccola])
+
+    min_x = min([point.x for point in caccola])
+    min_y = min([point.y for point in caccola])
+    if wall.vertical:
+        if not min_x < wall.index < max_x:
+            return False
+        if wall.ran.lower_bound >= max_y:
+            return  False
+        if wall.ran.upper_bound <= min_y:
+            return False
+        return True
+
+    if not min_y < wall.index < max_y:
+        return False
+    if wall.ran.lower_bound >= max_x:
+        return False
+    if wall.ran.upper_bound <= min_x:
+        return False
+    return True
+    
 
 
 def solve_part1(source: list[str]) -> int:
@@ -251,7 +277,7 @@ def solve_part2(source: list[str]) -> int:
     for scaled_wall in scaled_good_left_hor_walls:
         draw_lines(canvas, scaled_wall, color="green", width=6)
 
-    scaled_good_right_hor_walls = [[(wall.ran.lower_bound * scale, wall.index * scale), (wall.ran.upper_bound * scale, wall.index * scale,)] for wall in good_bottom_walls]
+    scaled_good_right_hor_walls = [[(wall.ran.lower_bound * scale, wall.index * scale), (wall.ran.upper_bound * scale, wall.index * scale)] for wall in good_bottom_walls]
     for scaled_wall in scaled_good_right_hor_walls:
         draw_lines(canvas, scaled_wall, color="orange", width=6)
 
@@ -263,11 +289,34 @@ def solve_part2(source: list[str]) -> int:
 
     el_cachone: dict[Point2d, bool] = {}
 
+    tot = len(area_info)
+    i = 0
     for info in area_info:
+        i = i+1
+        print(f"checking rectancle {i}/{tot}")
+        is_good = True
+        for wall in horizontal_walls + vertical_walls:
+            if rectangle_collides_with_wall(points[info.first_index], points[info.second_index], wall):
+                is_good = False
+                #print(f"Collision detected: rectangle {info.first_index} - {info.second_index} collides with {wall}")
+                #root, canvas, scaled_points = ready_canvas(points, scale)
+                #draw_rectangle(canvas, scaled_points, info.first_index, info.second_index)
+                #scaled_wall = [( wall.index * scale, wall.ran.lower_bound * scale), ( wall.index * scale, wall.ran.upper_bound * scale)] if wall.vertical else [(wall.ran.lower_bound * scale, wall.index * scale), (wall.ran.upper_bound * scale, wall.index * scale)]
+                #draw_lines(canvas, scaled_wall, color="orange", width=6)
+                #root.mainloop()
+                
+                break
+        
+        if not is_good:
+            continue
+            
+        print(f"THIS ONE IS GOOD! {info}")
+
         root, canvas, scaled_points = ready_canvas(points, scale)
         draw_rectangle(canvas, scaled_points, info.first_index, info.second_index)
         root.mainloop()
-
+        return info.area
+        
     return 0
 
 

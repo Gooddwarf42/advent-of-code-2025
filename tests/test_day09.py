@@ -55,11 +55,11 @@ def test_find_vertical_walls():
 @pytest.mark.parametrize(
     ("wall", "point", "expected"),
     [
-        (WallInfo(1, Range(2, 3)), Point2d(2, 2), True),
-        (WallInfo(3, Range(2, 3)), Point2d(2, 2), False),
-        (WallInfo(2, Range(2, 3)), Point2d(2, 2), False),
-        (WallInfo(1, Range(2, 3)), Point2d(2, 1), False),
-        (WallInfo(1, Range(2, 3)), Point2d(2, 3), True),
+        (WallInfo(1, Range(2, 3), True), Point2d(2, 2), True),
+        (WallInfo(3, Range(2, 3), True), Point2d(2, 2), False),
+        (WallInfo(2, Range(2, 3), True), Point2d(2, 2), False),
+        (WallInfo(1, Range(2, 3), True), Point2d(2, 1), False),
+        (WallInfo(1, Range(2, 3), True), Point2d(2, 3), True),
     ]
 )
 def test_is_wall_on_left(wall: WallInfo, point: Point2d, expected: bool):
@@ -69,11 +69,12 @@ def test_is_wall_on_left(wall: WallInfo, point: Point2d, expected: bool):
 @pytest.mark.parametrize(
     ("wall", "point", "expected"),
     [
-        (WallInfo(1, Range(2, 3)), Point2d(2, 2), False),
-        (WallInfo(3, Range(2, 3)), Point2d(2, 2), True),
-        (WallInfo(2, Range(2, 3)), Point2d(2, 2), False),
-        (WallInfo(3, Range(2, 3)), Point2d(2, 1), False),
-        (WallInfo(3, Range(2, 3)), Point2d(2, 3), True),
+        (WallInfo(1, Range(2, 3), True), Point2d(2, 2), False),
+        (WallInfo(3, Range(2, 3), True), Point2d(2, 2), True),
+        (WallInfo(2, Range(2, 3), True), Point2d(2, 2), False),
+        (WallInfo(3, Range(2, 3), True), Point2d(2, 1), False),
+        (WallInfo(3, Range(2, 3), True), Point2d(2, 3), True),
+        (WallInfo(3, Range(2, 3), True), Point2d(2, 3), True),
     ]
 )
 def test_is_wall_on_right(wall: WallInfo, point: Point2d, expected: bool):
@@ -82,13 +83,13 @@ def test_is_wall_on_right(wall: WallInfo, point: Point2d, expected: bool):
 @pytest.mark.parametrize(
     ("wall", "walls", "expected"),
     [
-        (WallInfo(1, Range(2, 3)), [WallInfo(0, Range(2, 3))], True),
-        (WallInfo(1, Range(2, 3)), [WallInfo(0, Range(0, 1))], False),
-        (WallInfo(1, Range(2, 3)), [WallInfo(0, Range(0, 2))], True),
-        (WallInfo(1, Range(2, 3)), [WallInfo(0, Range(3, 4))], True),
-        (WallInfo(1, Range(2, 3)), [WallInfo(0, Range(4, 5))], False),
-        (WallInfo(1, Range(2, 3)), [WallInfo(1, Range(2, 3))], False),
-        (WallInfo(1, Range(2, 3)), [WallInfo(2, Range(2, 3))], False),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(0, Range(2, 3), True)], True),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(0, Range(0, 1), True)], False),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(0, Range(0, 2), True)], True),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(0, Range(3, 4), True)], True),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(0, Range(4, 5), True)], False),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(1, Range(2, 3), True)], False),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(2, Range(2, 3), True)], False),
     ]
 )
 def test_has_wall_on_left(wall: WallInfo, walls: list[WallInfo], expected: bool):
@@ -97,13 +98,13 @@ def test_has_wall_on_left(wall: WallInfo, walls: list[WallInfo], expected: bool)
 @pytest.mark.parametrize(
     ("wall", "walls", "expected"),
     [
-        (WallInfo(1, Range(2, 3)), [WallInfo(0, Range(2, 3))], False),
-        (WallInfo(1, Range(2, 3)), [WallInfo(1, Range(2, 3))], False),
-        (WallInfo(1, Range(2, 3)), [WallInfo(2, Range(2, 3))], True),
-        (WallInfo(1, Range(2, 3)), [WallInfo(2, Range(0, 1))], False),
-        (WallInfo(1, Range(2, 3)), [WallInfo(2, Range(0, 2))], True),
-        (WallInfo(1, Range(2, 3)), [WallInfo(2, Range(3, 4))], True),
-        (WallInfo(1, Range(2, 3)), [WallInfo(2, Range(4, 5))], False),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(0, Range(2, 3), True)], False),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(1, Range(2, 3), True)], False),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(2, Range(2, 3), True)], True),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(2, Range(0, 1), True)], False),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(2, Range(0, 2), True)], True),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(2, Range(3, 4), True)], True),
+        (WallInfo(1, Range(2, 3), True), [WallInfo(2, Range(4, 5), True)], False),
     ]
 )
 def test_has_wall_on_right(wall: WallInfo, walls: list[WallInfo], expected: bool):
