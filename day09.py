@@ -1,6 +1,7 @@
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from tkinter import Tk
 
 from scipy.stats import false_discovery_control
 
@@ -25,6 +26,39 @@ class AreaInfo:
 class WallInfo:
     index: int
     ran: Range
+    
+######### DRAWING STUFF #############
+
+def ready_canvas(points: list[Point2d], scale: float) -> tuple[Tk, tk.Canvas, list[tuple[float, float]]]:
+    root: Tk = tk.Tk()
+    root.title("Line Drawing Example")
+
+    canvas = tk.Canvas(root, width=1200, height=1200, bg="white")
+    canvas.pack()
+
+    scaled_points = [(p.x * scale, p.y * scale) for p in points]
+    draw_lines(canvas, scaled_points, color="blue", width=2)
+    return root, canvas, scaled_points
+
+
+def draw_lines(canvas, pts: list[tuple[float, float]], color="black", width=2):
+    # Draw lines connecting consecutive points
+    for point_one, point_two in zip(pts, pts[1:]):
+        canvas.create_line(point_one[0], point_one[1], point_two[0], point_two[1], fill=color, width=width)
+
+    canvas.create_line(pts[0][0], pts[0][1], pts[-1][0], pts[-1][1], fill=color, width=width)
+
+    # Optional: draw the points as small circles
+    r = 3
+    for pt in pts:
+        canvas.create_oval(pt[0] - r, pt[1] - r, pt[0] + r, pt[1] + r, fill=color)
+
+def draw_rectangle(canvas: tk.Canvas, pts: list[tuple[float, float]], first: int, second: int, color="magenta", width=2):
+    marmellata = pts[first]
+    giusteppe = pts[second]
+    canvas.create_rectangle(marmellata[0], marmellata[1], giusteppe[0], giusteppe[1], fill=color, width=width)
+
+#####################################
 
 
 def get_area_info(points: list[Point2d]) -> list[AreaInfo]:
@@ -55,6 +89,20 @@ def find_vertical_walls(points: list[Point2d]) -> list[WallInfo]:
     walls.sort(key=lambda info: info.index)
     return walls
 
+def find_horizontal_walls(points: list[Point2d]) -> list[WallInfo]:
+    walls: list[WallInfo] = []
+
+    for i in range(len(points)):
+        this_point = points[i]
+        next_point = points[(i + 1) % len(points)]
+        if this_point.x == next_point.x:
+            # horizontal wall
+            continue
+        walls.append(WallInfo(this_point.y, Range(min(this_point.x, next_point.x), max(this_point.x, next_point.x))))
+
+    walls.sort(key=lambda info: info.index)
+    return walls
+
 
 def is_wall_on_left(wall: WallInfo, point: Point2d) -> bool:
     if wall.index >= point.x:
@@ -71,9 +119,9 @@ def has_wall_on_left(wall: WallInfo, walls: list[WallInfo]) -> bool:
     def is_wall_on_left_of_a_wall(source:WallInfo, target: WallInfo) -> bool:
         if target.index >= source.index:
             return False
-        if target.ran.lower_bound > source.ran.upper_bound:
+        if target.ran.lower_bound >= source.ran.upper_bound:
             return False
-        if target.ran.upper_bound < source.ran.lower_bound:
+        if target.ran.upper_bound <= source.ran.lower_bound:
             return  False
         return True
 
@@ -84,9 +132,9 @@ def has_wall_on_right(wall: WallInfo, walls: list[WallInfo]) -> bool:
     def is_wall_on_right_of_a_wall(source:WallInfo, target: WallInfo) -> bool:
         if target.index <= source.index:
             return False
-        if target.ran.lower_bound > source.ran.upper_bound:
+        if target.ran.lower_bound >= source.ran.upper_bound:
             return False
-        if target.ran.upper_bound < source.ran.lower_bound:
+        if target.ran.upper_bound <= source.ran.lower_bound:
             return  False
         return True
 
@@ -167,34 +215,21 @@ def solve_part2(source: list[str]) -> int:
             continue
 
 
+    horizontal_walls = find_horizontal_walls(points)
+    good_top_walls: list[WallInfo] = []
+    good_bottom_walls: list[WallInfo] = []
+    for wall in horizontal_walls:
+        if not has_wall_on_left(wall, horizontal_walls):
+            good_top_walls.append(wall)
+            continue
+        if not has_wall_on_right(wall, horizontal_walls):
+            good_bottom_walls.append(wall)
+            continue
+
     # drawiamo qualche cagatina
-    def draw_lines(canvas, pts: list[tuple[float, float]], color="black", width=2):
-        # Draw lines connecting consecutive points
-        for point_one, point_two in zip(pts, pts[1:]):
-            canvas.create_line(point_one[0], point_one[1], point_two[0], point_two[1], fill=color, width=width)
-
-        canvas.create_line(pts[0][0], pts[0][1], pts[-1][0], pts[-1][1], fill=color, width=width)
-
-        # Optional: draw the points as small circles
-        r = 3
-        for pt in pts:
-            canvas.create_oval(pt[0] - r, pt[1] - r, pt[0] + r, pt[1] + r, fill=color)
-
-    def draw_rectangle(canvas: tk.Canvas, pts: list[tuple[float, float]], first: int, second: int, color="black", width=2):
-        marmellata = pts[first]
-        giusteppe = pts[second]
-        canvas.create_rectangle(marmellata[0], marmellata[1], giusteppe[0], giusteppe[1], fill=color, width=width)
-
-    root = tk.Tk()
-    root.title("Line Drawing Example")
-
-    canvas = tk.Canvas(root, width=1200, height=1200, bg="white")
-    canvas.pack()
-
     scale = 0.0115
-    scale = 30
-    scaled_points = [(p.x * scale, p.y * scale) for p in points]
-    draw_lines(canvas, scaled_points, color="blue", width=2)
+    #scale = 30.0
+    root, canvas, scaled_points = ready_canvas(points, scale)
 
     scaled_vert_walls = [[(wall.index * scale, wall.ran.lower_bound * scale), (wall.index * scale, wall.ran.upper_bound * scale)] for wall in vertical_walls]
     for scaled_wall in scaled_vert_walls:
@@ -202,11 +237,23 @@ def solve_part2(source: list[str]) -> int:
 
     scaled_good_left_vert_walls = [[(wall.index * scale, wall.ran.lower_bound * scale), (wall.index * scale, wall.ran.upper_bound * scale)] for wall in good_left_walls]
     for scaled_wall in scaled_good_left_vert_walls:
-        draw_lines(canvas, scaled_wall, color="green", width=4)
+        draw_lines(canvas, scaled_wall, color="green", width=6)
 
     scaled_good_right_vert_walls = [[(wall.index * scale, wall.ran.lower_bound * scale), (wall.index * scale, wall.ran.upper_bound * scale)] for wall in good_right_walls]
     for scaled_wall in scaled_good_right_vert_walls:
-        draw_lines(canvas, scaled_wall, color="purple", width=4)
+        draw_lines(canvas, scaled_wall, color="orange", width=6)
+        
+    scaled_hor_walls = [[(wall.ran.lower_bound * scale, wall.index * scale), (wall.ran.upper_bound * scale, wall.index * scale)] for wall in horizontal_walls]
+    for scaled_wall in scaled_hor_walls:
+        draw_lines(canvas, scaled_wall, color="red", width=1)
+
+    scaled_good_left_hor_walls = [[(wall.ran.lower_bound * scale, wall.index * scale,), (wall.ran.upper_bound * scale, wall.index * scale)] for wall in good_top_walls]
+    for scaled_wall in scaled_good_left_hor_walls:
+        draw_lines(canvas, scaled_wall, color="green", width=6)
+
+    scaled_good_right_hor_walls = [[(wall.ran.lower_bound * scale, wall.index * scale), (wall.ran.upper_bound * scale, wall.index * scale,)] for wall in good_bottom_walls]
+    for scaled_wall in scaled_good_right_hor_walls:
+        draw_lines(canvas, scaled_wall, color="orange", width=6)
 
     root.mainloop()
 
@@ -217,66 +264,9 @@ def solve_part2(source: list[str]) -> int:
     el_cachone: dict[Point2d, bool] = {}
 
     for info in area_info:
-        if info.first_index != 4 or info.second_index != 6:
-            continue
-
-        first_point = points[info.first_index]
-        second_point = points[info.second_index]
-        caccola = [first_point, second_point]
-        max_x = max([point.x for point in caccola])
-        max_y = max([point.y for point in caccola])
-
-        min_x = min([point.x for point in caccola])
-        min_y = min([point.y for point in caccola])
-
-        # LALALALALLA IO NON HO VISTO NIENTE!
-        rect_points = [Point2d(x, y)
-                       for x in range(min_x, max_x + 1)
-                       for y in range(min_y, max_y + 1)]
-
-        is_good = True
-        for current_test_point in rect_points:
-            is_this_point_inside = False
-            if current_test_point in el_cachone:
-                is_this_point_inside = el_cachone[current_test_point]
-                if not is_this_point_inside:
-                    print(f"rejecting rectangle {info} because point {current_test_point} is detected to not be inside")
-                    is_good = False
-                    break
-                continue
-
-            # things
-            walls_on_left = count(vertical_walls, lambda wall: is_wall_on_left(wall, current_test_point))
-            walls_on_on_right = count(vertical_walls, lambda wall: is_wall_on_right(wall, current_test_point))
-
-            if count(vertical_walls, lambda wall : current_test_point.x == wall.index and is_in_bound(current_test_point.y, wall.ran, True, True)) > 0:
-                #the point lies exactly on a vertical wall, consider it internal
-                is_this_point_inside = True
-                el_cachone[current_test_point] = is_this_point_inside
-                continue
-
-            if walls_on_left % 2 == 0 or walls_on_on_right % 2  == 0:
-                # bad!
-                is_this_point_inside = False
-                el_cachone[current_test_point] = is_this_point_inside
-
-                if not is_this_point_inside:
-                    print(f"rejecting rectangle {info} because point {current_test_point} is detected to not be inside")
-                    is_good = False
-                    break
-
-        if is_good:
-            root = tk.Tk()
-            root.title("Line Drawing Example")
-
-            canvas = tk.Canvas(root, width=1200, height=1200, bg="white")
-            canvas.pack()
-            scaled_points = [(p.x * scale, p.y * scale) for p in points]
-            draw_lines(canvas, scaled_points, color="blue", width=2)
-            gigi = [scaled_points[info.first_index], scaled_points[info.second_index]]
-            draw_lines(canvas, gigi, color="green", width=3)
-            root.mainloop()
-            return info.area
+        root, canvas, scaled_points = ready_canvas(points, scale)
+        draw_rectangle(canvas, scaled_points, info.first_index, info.second_index)
+        root.mainloop()
 
     return 0
 
