@@ -28,3 +28,8 @@ def distinct(source: list[T]) -> list[T]:
 
 def count(source:list[T], predicate:Callable[[T], bool]) -> int:
     return sum(1 for x in source if predicate(x))
+
+def parse_list_of_int(string: str, separator: str = ",") -> list[int]:
+    if string == "":
+        return []
+    return list(map(int, string.split(separator)))
