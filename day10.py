@@ -48,7 +48,7 @@ def parse_problems(source: list[str]) -> list[Problem]:
     return list(map(parse_problem, source))
         
 
-def solve_1(problem) -> int:
+def solve(problem) -> int:
     return 0
 
 
@@ -56,11 +56,20 @@ def solve_part1(source: list[str]) -> int:
     problems = parse_problems(source)
     count = 0
     for problem in problems:
-        count += solve_1(problem)
+        part_one_problem = Problem(
+            problem.starting,
+            problem.buttons,
+            [1 for _ in range(len(problem.buttons))]
+        )
+        count += solve(part_one_problem)
     return 0
 
 
 def solve_part2(source: list[str]) -> int:
+    problems = parse_problems(source)
+    count = 0
+    for problem in problems:
+        count += solve(problem)
     return 0
 
 
