@@ -1,6 +1,7 @@
 import re
 import time
 from dataclasses import dataclass
+from itertools import product
 from pathlib import Path
 from tkinter import Tk
 
@@ -52,7 +53,12 @@ def parse_problems(source: list[str]) -> list[Problem]:
 def create_graph(problem: Problem) -> WeightedGraph[str]:
     # TODO
     length = len(problem.starting)
-    return WeightedGraph(["." * length, problem.starting])
+    vertexes  = ["".join(c) for c in product(".#", repeat=length)] #blatant chatgpt cheating. Could have used ints tbh
+    graph = WeightedGraph(vertexes)
+    
+    # TODO add edges, I am too eepy to do it now properly...
+    
+    return graph
 
 
 def solve(problem: Problem) -> int:
