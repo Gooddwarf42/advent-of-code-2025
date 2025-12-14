@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from day10 import solve_part1, solve_part2, Problem, parse_problem
+from day10 import solve_part1, solve_part2, Problem, parse_problem, solve
 from utils.input import parse_lines, parse
 from utils.points import Point3d, Point2d, get_points2d
 from utils.range import Range
@@ -28,8 +28,15 @@ def test_day10_solve_part2() -> None:
 def test_parse_problem():
     input = "[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}"
     expected = Problem(
-        [False, True, True, False],
-        [[3], [1,3], [2], [2,3], [0,2], [0,1]],
-        [3,5,4,7]
+        ".##.",
+        [[3], [1, 3], [2], [2, 3], [0, 2], [0, 1]],
+        [3, 5, 4, 7]
     )
     assert parse_problem(input) == expected
+
+
+def test_solve():
+    input = "[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {1,1,1,1}"
+    problem = parse_problem(input)
+    expected = 2
+    assert solve(problem) == expected

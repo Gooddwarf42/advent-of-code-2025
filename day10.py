@@ -7,6 +7,7 @@ from tkinter import Tk
 from hypothesis.extra.array_api import DataType
 from scipy.stats import false_discovery_control
 
+from utils.graph import WeightedGraph
 from utils.input import parse_lines
 from utils.list import count, parse_list_of_int
 from utils.points import Point2d, get_points2d
@@ -18,7 +19,7 @@ DAY = "10"
 
 @dataclass(frozen=True)
 class Problem:
-    starting: list[bool]
+    starting: str
     buttons: list[list[int]]
     joltages: list[int]
 
@@ -39,18 +40,27 @@ def parse_problem(source:str) -> Problem:
     joltages = re.findall(joltage_pattern, source)
 
     return Problem(
-        [c == "#" for c in start[0]],
+        start[0],
         [parse_list_of_int(group) for group in buttons],
         list(map(int, joltages[0].split(",")))
     )
 
 def parse_problems(source: list[str]) -> list[Problem]:
     return list(map(parse_problem, source))
-        
+
+
+def create_graph(problem: Problem) -> WeightedGraph[str]:
+    # TODO
+    length = len(problem.starting)
+    return WeightedGraph(["." * length, problem.starting])
+
 
 def solve(problem: Problem) -> int:
+    length = len(problem.starting)
+    final = "." * length
     graph : WeightedGraph = create_graph(problem)
-    return 0
+    distances = graph.djikstra(final)
+    return distances[problem.starting]
 
 
 def solve_part1(source: list[str]) -> int:
