@@ -48,7 +48,8 @@ def parse_problems(source: list[str]) -> list[Problem]:
     return list(map(parse_problem, source))
         
 
-def solve(problem) -> int:
+def solve(problem: Problem) -> int:
+    graph : WeightedGraph = create_graph(problem)
     return 0
 
 
