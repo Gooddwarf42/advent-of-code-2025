@@ -3,6 +3,7 @@ import time
 from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
+from queue import PriorityQueue, Queue
 from typing import Tuple
 from tkinter import Tk
 
@@ -47,7 +48,7 @@ def parse_problem(source:str) -> Problem:
     return Problem(
         int(start_binary_string, 2),
         [parse_list_of_int(group) for group in buttons],
-        list(map(int, joltages[0].split(",")))
+        tuple(map(int, joltages[0].split(",")))
     )
 
 def parse_problems(source: list[str]) -> list[Problem]:
@@ -101,8 +102,34 @@ def solve_part1_problem(problem: Problem) -> int:
 def solve_part2_problem(problem: Problem) -> int:
     length = len(problem.joltages)
     start = tuple([0 for _ in problem.joltages])
-    graph : WeightedGraph[Tuple[int, ...]] = create_part2_graph(problem)
-    distances = graph.djikstra(start)
+    # nah, my djikstra doesn't work, requires full knowledge of the graph, and this is a really sparse one.
+    # I'll just do this in place for now
+    distances = { start:0 }
+
+    # should use a priority queue here, but I don't know of an easy way to update priorities on the fly here
+    queue = Queue()
+    queue.put(start)
+
+    while not queue.empty():
+        current : tuple[int, ...]= queue.get()
+        current_distance = distances[current] #we know this key is in the dictionary
+
+        for button in problem.buttons:
+            destination = tuple([joltage +1 if i in button else joltage for i, joltage in enumerate(current)])
+            print(f"\tChecking destination {destination}")
+            if any(destination[i] > problem.joltages[i] for i in range(length)):
+                # invalid state, one of the joltages is too high
+                continue
+
+            destination_distance = current_distance + 1
+            if destination in distances and destination_distance >= distances[destination]:
+                continue
+            # shorter path found! update distance and enqueue
+            distances[destination] = destination_distance
+            queue.put(destination)
+            if current == problem.joltages:
+                break
+
     return distances[problem.joltages]
 
 
@@ -117,8 +144,13 @@ def solve_part1(source: list[str]) -> int:
 def solve_part2(source: list[str]) -> int:
     problems = parse_problems(source)
     count = 0
+    i = 1
     for problem in problems:
+        print(f"solving problem {i}/{len(source)}...")
         count += solve_part2_problem(problem)
+        print(f"solved problem {i}!")
+        i = i + 1
+
     return count
 
 

@@ -23,7 +23,7 @@ def test_day10_solve_part2() -> None:
     path = Path(__file__).parent / f"{DAY}.txt"
     input = parse_lines(path)
     solution = solve_part2(input)
-    assert solution == 24
+    assert solution == 33
 
 
 def test_parse_problem():
