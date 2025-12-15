@@ -105,8 +105,13 @@ def solve_part2_problem(problem: Problem) -> int:
     #let's try with recursion with memorization
     el_cachone = { start:0 }
 
+    gigi = 0
     def find_min_recursively(source: tuple[int, ...]) -> int:
         if source in el_cachone:
+            nonlocal gigi
+            gigi = gigi + 1
+            if gigi % 1000000 == 0:
+                print(f"cachone hittone: {source} can be done in {el_cachone[source]}")
             return el_cachone[source]
 
         result = MAX_INT
@@ -121,6 +126,8 @@ def solve_part2_problem(problem: Problem) -> int:
             if result_with_this_button < result:
                 result = result_with_this_button
 
+        if result < MAX_INT:
+            print(f"scrivo el cachone: {source} can be done in {result + 1}")
         el_cachone[source] = result + 1
         return el_cachone[source]
 
