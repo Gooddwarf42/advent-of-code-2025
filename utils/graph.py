@@ -12,6 +12,7 @@ class WeightedEdgeInfo(Generic[T]):
     to: T
     weight: int
 
+@dataclass()
 class WeightedGraph(Generic[T]):
     edges: dict[T, list[WeightedEdgeInfo[T]]]
 

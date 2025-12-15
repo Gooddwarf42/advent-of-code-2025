@@ -3,7 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from day10 import solve_part1, solve_part2, Problem, parse_problem, solve
+from day10 import solve_part1, solve_part2, Problem, parse_problem, solve, create_graph
+from utils.graph import WeightedGraph
 from utils.input import parse_lines, parse
 from utils.points import Point3d, Point2d, get_points2d
 from utils.range import Range
@@ -43,4 +44,16 @@ def test_solve():
 
 
 def test_create_graph():
-    assert False
+    input = "[.#] (0,1) (0) {1,2}"
+    problem = parse_problem(input)
+    graph = WeightedGraph[int]([0, 1, 2, 3])
+    graph.add_edge(0b00, 0b11, 3)
+    graph.add_edge(0b11, 0b00, 3)
+    graph.add_edge(0b01, 0b10, 3)
+    graph.add_edge(0b10, 0b01, 3)
+    graph.add_edge(0b00, 0b10, 1)
+    graph.add_edge(0b10, 0b00, 1)
+    graph.add_edge(0b01, 0b11, 1)
+    graph.add_edge(0b11, 0b01, 1)
+
+    assert create_graph(problem) == graph

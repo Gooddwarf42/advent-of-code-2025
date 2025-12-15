@@ -64,7 +64,8 @@ def create_graph(problem: Problem) -> WeightedGraph[int]:
         for value in button:
             index = (length - 1)- value
             change = change + 2 ** index
-            weight = weight + problem.joltages[index]
+            #weight = weight + problem.joltages[value]
+            weight = 1
 
         for vertex in vertexes:
             graph.add_edge(vertex, vertex ^ change, weight)
@@ -86,10 +87,10 @@ def solve_part1(source: list[str]) -> int:
         part_one_problem = Problem(
             problem.starting,
             problem.buttons,
-            [1 for _ in range(len(problem.buttons))]
+            [1 for _ in range(len(problem.joltages))]
         )
         count += solve(part_one_problem)
-    return 0
+    return count
 
 
 def solve_part2(source: list[str]) -> int:
@@ -97,7 +98,7 @@ def solve_part2(source: list[str]) -> int:
     count = 0
     for problem in problems:
         count += solve(problem)
-    return 0
+    return count
 
 
 if __name__ == "__main__":
