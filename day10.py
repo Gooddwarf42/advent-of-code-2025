@@ -10,7 +10,7 @@ from tkinter import Tk
 from hypothesis.extra.array_api import DataType
 from scipy.stats import false_discovery_control
 
-from utils.graph import WeightedGraph
+from utils.graph import WeightedGraph, MAX_INT
 from utils.input import parse_lines
 from utils.list import count, parse_list_of_int
 from utils.points import Point2d, get_points2d
@@ -102,35 +102,29 @@ def solve_part1_problem(problem: Problem) -> int:
 def solve_part2_problem(problem: Problem) -> int:
     length = len(problem.joltages)
     start = tuple([0 for _ in problem.joltages])
-    # nah, my djikstra doesn't work, requires full knowledge of the graph, and this is a really sparse one.
-    # I'll just do this in place for now
-    distances = { start:0 }
+    #let's try with recursion with memorization
+    el_cachone = { start:0 }
 
-    # should use a priority queue here, but I don't know of an easy way to update priorities on the fly here
-    queue = Queue()
-    queue.put(start)
+    def find_min_recursively(source: tuple[int, ...]) -> int:
+        if source in el_cachone:
+            return el_cachone[source]
 
-    while not queue.empty():
-        current : tuple[int, ...]= queue.get()
-        current_distance = distances[current] #we know this key is in the dictionary
-
+        result = MAX_INT
         for button in problem.buttons:
-            destination = tuple([joltage +1 if i in button else joltage for i, joltage in enumerate(current)])
-            print(f"\tChecking destination {destination}")
-            if any(destination[i] > problem.joltages[i] for i in range(length)):
-                # invalid state, one of the joltages is too high
+            updated_state = tuple([joltage - 1 if i in button else joltage for i, joltage in enumerate(source)])
+            #print(f"\tChecking destination {updated_state}")
+            if any(updated_state[i] < 0  for i in range(length)):
+                # invalid state
                 continue
 
-            destination_distance = current_distance + 1
-            if destination in distances and destination_distance >= distances[destination]:
-                continue
-            # shorter path found! update distance and enqueue
-            distances[destination] = destination_distance
-            queue.put(destination)
-            if current == problem.joltages:
-                break
+            result_with_this_button = find_min_recursively(updated_state)
+            if result_with_this_button < result:
+                result = result_with_this_button
 
-    return distances[problem.joltages]
+        el_cachone[source] = result + 1
+        return el_cachone[source]
+
+    return find_min_recursively(problem.joltages)
 
 
 def solve_part1(source: list[str]) -> int:
