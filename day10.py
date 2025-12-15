@@ -3,6 +3,7 @@ import time
 from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
+from typing import Tuple
 from tkinter import Tk
 
 from hypothesis.extra.array_api import DataType
@@ -22,7 +23,7 @@ DAY = "10"
 class Problem:
     starting: int #using bitwise representation
     buttons: list[list[int]]
-    joltages: list[int]
+    joltages: Tuple[int, ...]
 
     def __post_init__(self):
         if self.starting.bit_length() > len(self.joltages):
@@ -53,7 +54,7 @@ def parse_problems(source: list[str]) -> list[Problem]:
     return list(map(parse_problem, source))
 
 
-def create_graph(problem: Problem) -> WeightedGraph[int]:
+def create_part1_graph(problem: Problem) -> WeightedGraph[int]:
     length = len(problem.joltages)
     vertexes  = [i for i in range(2 ** length)]
     graph = WeightedGraph(vertexes)
@@ -64,7 +65,6 @@ def create_graph(problem: Problem) -> WeightedGraph[int]:
         for value in button:
             index = (length - 1)- value
             change = change + 2 ** index
-            #weight = weight + problem.joltages[value]
             weight = 1
 
         for vertex in vertexes:
@@ -73,23 +73,44 @@ def create_graph(problem: Problem) -> WeightedGraph[int]:
     return graph
 
 
-def solve(problem: Problem) -> int:
+def create_part2_graph(problem: Problem) -> WeightedGraph[Tuple[int, ...]]:
+    length = len(problem.joltages)
+    vertexes = [i for i in range(2 ** length)]
+    graph = WeightedGraph(vertexes)
+
+    for button in problem.buttons:
+        change = 0
+        weight = 0
+        for value in button:
+            index = (length - 1) - value
+            change = change + 2 ** index
+            weight = 1
+
+        for vertex in vertexes:
+            graph.add_edge(vertex, vertex ^ change, weight)
+
+    return graph
+
+
+def solve_part1_problem(problem: Problem) -> int:
     final = 0
-    graph : WeightedGraph[int] = create_graph(problem)
+    graph : WeightedGraph[int] = create_part1_graph(problem)
     distances = graph.djikstra(final)
     return distances[problem.starting]
+
+def solve_part2_problem(problem: Problem) -> int:
+    length = len(problem.joltages)
+    start = tuple([0 for _ in problem.joltages])
+    graph : WeightedGraph[Tuple[int, ...]] = create_part2_graph(problem)
+    distances = graph.djikstra(start)
+    return distances[problem.joltages]
 
 
 def solve_part1(source: list[str]) -> int:
     problems = parse_problems(source)
     count = 0
     for problem in problems:
-        part_one_problem = Problem(
-            problem.starting,
-            problem.buttons,
-            [1 for _ in range(len(problem.joltages))]
-        )
-        count += solve(part_one_problem)
+        count += solve_part1_problem(problem)
     return count
 
 
@@ -97,7 +118,7 @@ def solve_part2(source: list[str]) -> int:
     problems = parse_problems(source)
     count = 0
     for problem in problems:
-        count += solve(problem)
+        count += solve_part2_problem(problem)
     return count
 
 
