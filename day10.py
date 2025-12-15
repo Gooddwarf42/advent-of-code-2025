@@ -58,7 +58,16 @@ def create_graph(problem: Problem) -> WeightedGraph[int]:
     vertexes  = [i for i in range(2 ** length)]
     graph = WeightedGraph(vertexes)
     
-    # TODO add edges, I am too eepy to do it now properly...
+    for button in problem.buttons:
+        change = 0
+        weight = 0
+        for value in button:
+            index = (length - 1)- value
+            change = change + 2 ** index
+            weight = weight + problem.joltages[index]
+
+        for vertex in vertexes:
+            graph.add_edge(vertex, vertex ^ change, weight)
     
     return graph
 

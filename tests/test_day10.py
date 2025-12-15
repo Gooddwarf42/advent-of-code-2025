@@ -40,3 +40,7 @@ def test_solve():
     problem = parse_problem(input)
     expected = 2
     assert solve(problem) == expected
+
+
+def test_create_graph():
+    assert False
