@@ -20,15 +20,15 @@ DAY = "10"
 
 @dataclass(frozen=True)
 class Problem:
-    starting: str
+    starting: int #using bitwise representation
     buttons: list[list[int]]
     joltages: list[int]
 
     def __post_init__(self):
-        if len(self.starting) != len(self.joltages):
+        if self.starting.bit_length() > len(self.joltages):
             raise ValueError(
-                f"`starting` and `joltages` must have the same length "
-                f"({len(self.starting)} != {len(self.joltages)})"
+                f"`starting` is invalid "
+                f"({bin(self.starting)} has more than {len(self.joltages)} bits)"
             )
 
 
@@ -40,8 +40,11 @@ def parse_problem(source:str) -> Problem:
     buttons = re.findall(button_pattern, source)
     joltages = re.findall(joltage_pattern, source)
 
+    strart_string :str = start[0]
+    start_binary_string = strart_string.replace("#", "1").replace(".", "0")
+
     return Problem(
-        start[0],
+        int(start_binary_string, 2),
         [parse_list_of_int(group) for group in buttons],
         list(map(int, joltages[0].split(",")))
     )
@@ -50,10 +53,9 @@ def parse_problems(source: list[str]) -> list[Problem]:
     return list(map(parse_problem, source))
 
 
-def create_graph(problem: Problem) -> WeightedGraph[str]:
-    # TODO
-    length = len(problem.starting)
-    vertexes  = ["".join(c) for c in product(".#", repeat=length)] #blatant chatgpt cheating. Could have used ints tbh
+def create_graph(problem: Problem) -> WeightedGraph[int]:
+    length = len(problem.joltages)
+    vertexes  = [i for i in range(2 ** length)]
     graph = WeightedGraph(vertexes)
     
     # TODO add edges, I am too eepy to do it now properly...
@@ -62,9 +64,8 @@ def create_graph(problem: Problem) -> WeightedGraph[str]:
 
 
 def solve(problem: Problem) -> int:
-    length = len(problem.starting)
-    final = "." * length
-    graph : WeightedGraph = create_graph(problem)
+    final = 0
+    graph : WeightedGraph[int] = create_graph(problem)
     distances = graph.djikstra(final)
     return distances[problem.starting]
 
