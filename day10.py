@@ -92,14 +92,20 @@ def create_part2_graph(problem: Problem) -> WeightedGraph[Tuple[int, ...]]:
 
     return graph
 
-def actually_finally_solve_part_2(buttons : list[list[int]], state : tuple[int, ...], usable_tail_length : int) -> int:
+def actually_finally_solve_part_2(buttons : list[list[int]], state : tuple[int, ...], usable_tail_length : int, cache:  dict[tuple[tuple[int, ...], int], int]  ) -> int:
+    key = (state, usable_tail_length)
+    if key in cache:
+        return cache[key]
+
     if usable_tail_length == 1:
         last_button = buttons[-1]
         valid_value = state[last_button[0]]
         this_should_all_be_true_if_it_is_doable = [state[i] == valid_value if i in last_button else state[i] == 0 for i in range(len(state))]
         if any([not valid for valid in this_should_all_be_true_if_it_is_doable]):
-            return MAX_INT
-        return valid_value
+            cache[key] = MAX_INT
+            return cache[key]
+        cache[key] = valid_value
+        return cache[key]
 
     result = MAX_INT
     first_button = buttons[len(buttons) - usable_tail_length]
@@ -107,18 +113,19 @@ def actually_finally_solve_part_2(buttons : list[list[int]], state : tuple[int, 
     presses = 0
     for i in range(max_presses + 1):
         updated_state = tuple([joltage - i if j in first_button else joltage for j, joltage in enumerate(state)])
-        if ((usable_tail_length == 4 and i == 5)
-                or (usable_tail_length == 3 and i == 0)
-                or (usable_tail_length == 2 and i == 5)
-        ):
-            print(f"button {len(buttons) - usable_tail_length} ({first_button}) pressed {i} times. This should be good: {state} -> {updated_state}")
+        # if ((usable_tail_length == 4 and i == 5)
+        #         or (usable_tail_length == 3 and i == 0)
+        #         or (usable_tail_length == 2 and i == 5)
+        # ):
+        #     print(f"button {len(buttons) - usable_tail_length} ({first_button}) pressed {i} times. This should be good: {state} -> {updated_state}")
 
-        partial_result = actually_finally_solve_part_2(buttons, updated_state, usable_tail_length - 1)
+        partial_result = actually_finally_solve_part_2(buttons, updated_state, usable_tail_length - 1, cache)
         if partial_result < result:
             result = partial_result
             presses = i
 
-    return result + presses
+    cache[key] = result + presses
+    return cache[key]
 
 
 def solve_part1_problem(problem: Problem) -> int:
@@ -132,8 +139,9 @@ def solve_part2_problem(problem: Problem) -> int:
     start = tuple([0 for _ in problem.joltages])
     #let's try with recursion with memorization
     # todo do that
-    el_cachone = { start:0 }
-    return actually_finally_solve_part_2(problem.buttons, problem.joltages, len(problem.buttons))
+    tail_length = len(problem.buttons)
+    el_cachone = { (start, tail_length ):0 }
+    return actually_finally_solve_part_2(problem.buttons, problem.joltages, tail_length, el_cachone)
 
 
 def solve_part1(source: list[str]) -> int:
