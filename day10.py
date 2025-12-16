@@ -92,6 +92,27 @@ def create_part2_graph(problem: Problem) -> WeightedGraph[Tuple[int, ...]]:
 
     return graph
 
+def actually_finally_solve_part_2(buttons : list[list[int]], state : tuple[int, ...], usable_tail_length : int) -> int:
+    if usable_tail_length == 1:
+        last_button = buttons[-1]
+        valid_value = state[last_button[0]]
+        this_should_all_be_true_if_it_is_doable = [state[i] == valid_value if i in buttons else state[i] == 0 for i in range(len(state))]
+        if any([not valid for valid in this_should_all_be_true_if_it_is_doable]):
+            return MAX_INT
+        return valid_value
+
+    result = MAX_INT
+    first_button = buttons[len(buttons) - usable_tail_length]
+    max_presses = min([state[i] for i in first_button])
+    for i in range(max_presses):
+        updated_state = tuple([joltage - i if j in first_button else joltage for j, joltage in enumerate(state)])
+
+        partial_result = actually_finally_solve_part_2(buttons, updated_state, usable_tail_length - 1)
+        if partial_result < result:
+            result = partial_result
+
+    return min(result + 1, MAX_INT)
+
 
 def solve_part1_problem(problem: Problem) -> int:
     final = 0
@@ -103,35 +124,9 @@ def solve_part2_problem(problem: Problem) -> int:
     length = len(problem.joltages)
     start = tuple([0 for _ in problem.joltages])
     #let's try with recursion with memorization
+    # todo do that
     el_cachone = { start:0 }
-
-    gigi = 0
-    def find_min_recursively(source: tuple[int, ...]) -> int:
-        if source in el_cachone:
-            nonlocal gigi
-            gigi = gigi + 1
-            if gigi % 1000000 == 0:
-                print(f"cachone hittone: {source} can be done in {el_cachone[source]}")
-            return el_cachone[source]
-
-        result = MAX_INT
-        for button in problem.buttons:
-            updated_state = tuple([joltage - 1 if i in button else joltage for i, joltage in enumerate(source)])
-            #print(f"\tChecking destination {updated_state}")
-            if any(updated_state[i] < 0  for i in range(length)):
-                # invalid state
-                continue
-
-            result_with_this_button = find_min_recursively(updated_state)
-            if result_with_this_button < result:
-                result = result_with_this_button
-
-        if result < MAX_INT:
-            print(f"scrivo el cachone: {source} can be done in {result + 1}")
-        el_cachone[source] = result + 1
-        return el_cachone[source]
-
-    return find_min_recursively(problem.joltages)
+    return actually_finally_solve_part_2(problem.buttons, problem.joltages, len(problem.buttons))
 
 
 def solve_part1(source: list[str]) -> int:
