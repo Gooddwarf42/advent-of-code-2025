@@ -96,7 +96,7 @@ def actually_finally_solve_part_2(buttons : list[list[int]], state : tuple[int, 
     if usable_tail_length == 1:
         last_button = buttons[-1]
         valid_value = state[last_button[0]]
-        this_should_all_be_true_if_it_is_doable = [state[i] == valid_value if i in buttons else state[i] == 0 for i in range(len(state))]
+        this_should_all_be_true_if_it_is_doable = [state[i] == valid_value if i in last_button else state[i] == 0 for i in range(len(state))]
         if any([not valid for valid in this_should_all_be_true_if_it_is_doable]):
             return MAX_INT
         return valid_value
@@ -104,14 +104,21 @@ def actually_finally_solve_part_2(buttons : list[list[int]], state : tuple[int, 
     result = MAX_INT
     first_button = buttons[len(buttons) - usable_tail_length]
     max_presses = min([state[i] for i in first_button])
-    for i in range(max_presses):
+    presses = 0
+    for i in range(max_presses + 1):
         updated_state = tuple([joltage - i if j in first_button else joltage for j, joltage in enumerate(state)])
+        if ((usable_tail_length == 4 and i == 5)
+                or (usable_tail_length == 3 and i == 0)
+                or (usable_tail_length == 2 and i == 5)
+        ):
+            print(f"button {len(buttons) - usable_tail_length} ({first_button}) pressed {i} times. This should be good: {state} -> {updated_state}")
 
         partial_result = actually_finally_solve_part_2(buttons, updated_state, usable_tail_length - 1)
         if partial_result < result:
             result = partial_result
+            presses = i
 
-    return min(result + 1, MAX_INT)
+    return result + presses
 
 
 def solve_part1_problem(problem: Problem) -> int:
@@ -142,9 +149,12 @@ def solve_part2(source: list[str]) -> int:
     count = 0
     i = 1
     for problem in problems:
+        #problem = problems[-1]
         print(f"solving problem {i}/{len(source)}...")
-        count += solve_part2_problem(problem)
-        print(f"solved problem {i}!")
+        solution = solve_part2_problem(problem)
+        count += solution
+        print(f"solved problem {i}: {solution}!")
+        #break
         i = i + 1
 
     return count
